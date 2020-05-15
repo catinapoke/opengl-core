@@ -55,7 +55,7 @@ private:
     // все графические объекты
     std::vector<GraphicObject> graphicObjects;
     // json-документ в котором приводится описание всех моделей
-    rapidjson::Document modelsDescription;
+    rapidjson::Document* modelsDescription;
     // имя файла загруженной сцены (для формирования отладочного сообщения)
     std::string sceneFilename;
 };

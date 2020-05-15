@@ -3,27 +3,22 @@
 
 void Scene::init(std::string filename)
 {
-    rapidjson::Document* document = GetJsonDocument(filename);
-    if (document == nullptr)
-        return;
+    modelsDescription = GetJsonDocument(filename);
 
-    modelsDescription.CopyFrom(*document, document->GetAllocator());
-    delete(document);
-
-    const rapidjson::Value& membersObject = modelsDescription["Models"];
-    std::cout << "Scene members: \n";
-    int k = 0;
-    std::cout<< "array " << membersObject.Capacity() << "\n";
-    for (rapidjson::Value::ConstMemberIterator it = membersObject.MemberBegin(); it != membersObject.MemberEnd(); it++)
-    {
-        std::cout << k << ") ";
-        std::cout << it->name.GetString() << " - ";
-        std::cout << it->value["id"].GetString() << "\n";
-        
-        objectInfo[it->value["id"].GetString()] = it;
-        //std::cout << it->name.GetString() << "\n";
-        k++;
-    }
+    //const rapidjson::Value& membersObject = modelsDescription["Models"];
+    //std::cout << "Scene members: \n";
+    //int k = 0;
+    //std::cout<< "array " << membersObject.Capacity() << "\n";
+    //for (rapidjson::Value::ConstMemberIterator it = modelsDescription["Models"].MemberBegin(); it != modelsDescription["Models"].MemberEnd(); it++)
+    //{
+    //    std::cout << k << ") ";
+    //    std::cout << it->name.GetString() << " - ";
+    //    std::cout << it->value["id"].GetString() << "\n";
+    //    
+    //    objectInfo[it->value["id"].GetString()] = it;
+    //    //std::cout << it->name.GetString() << "\n";
+    //    k++;
+    //}
 }
 
 rapidjson::Document* Scene::GetJsonDocument(std::string filename)
@@ -60,9 +55,10 @@ bool Scene::loadFromJSON(std::string filename)
         return false;
 
     sceneFilename = filename;
+    printf("Loading scene - %s\n", filename);
 
     const rapidjson::Value& membersObject = (*sceneDocument)["scene"];
-    for (rapidjson::Value::ConstMemberIterator it = membersObject.MemberBegin(); it != membersObject.MemberEnd(); it++)
+    for (rapidjson::Value::ConstMemberIterator it = (*sceneDocument)["scene"].MemberBegin(); it != (*sceneDocument)["scene"].MemberEnd(); it++)
     {
         std::string id = it->value["Model"]["id"].GetString();
         vec3 position = StrToVec3(it->value["Position"]["value"].GetString());
@@ -74,6 +70,7 @@ bool Scene::loadFromJSON(std::string filename)
 
         graphicObjects.push_back(graphicObject);
     }
+    printf("Scene information - %s\n", getSceneDescription());
     return true;
 }
 
@@ -95,7 +92,6 @@ vec3 Scene::StrToVec3(std::string str)
 {
     std::stringstream stream;
     stream.str(str);
-    printf_s("1");
     vec3 output;
     stream >> output.x >> output.y >> output.z;
     return output;
@@ -112,13 +108,19 @@ vec4 Scene::StrToVec4(std::string str)
 
 GraphicObject Scene::createGraphicObject(std::string str)
 {
-    printf_s("Request graphic object with id: %s\n", str);
+    //printf_s("Request graphic object with id: %s\n", str);
 
-    std::unordered_map<std::string, rapidjson::Value::ConstMemberIterator>::const_iterator iterator;
-    iterator = objectInfo.find(str);
-    if (iterator == objectInfo.end())
-        throw new std::exception("Can't find object info");
-    return createGraphicObject(iterator->second);
+    //std::unordered_map<std::string, rapidjson::Value::ConstMemberIterator>::const_iterator iterator;
+    //iterator = objectInfo.find(str);
+    //if (iterator == objectInfo.end())
+    //    throw new std::exception("Can't find object info");
+    //return createGraphicObject(iterator->second);
+
+    for (rapidjson::Value::ConstMemberIterator it = (*modelsDescription)["Models"].MemberBegin(); it != (*modelsDescription)["Models"].MemberEnd(); it++)
+    {
+        if (it->value["id"].GetString() == str)
+            return createGraphicObject(it);
+    }
 }
 
 Camera* Scene::getCamera()
@@ -137,22 +139,29 @@ GraphicObject Scene::createGraphicObject(rapidjson::Value::ConstMemberIterator i
     ResourceManager& manager = ResourceManager::instance();
 
     GraphicObjectType objectType = graphicObjectTypeMap[it->value["type"].GetString()];
-    printf("Object type: %s\n", it->value["type"].GetString());
-    printf("Object's mesh path: %s\n", it->value["Mesh"]["path"].GetString());
+
+    //printf("Object type: %s\n", it->value["type"].GetString());
+    //printf("Object's mesh path: %s\n", it->value["Mesh"]["path"].GetString());
+
     int meshId = manager.loadMesh(it->value["Mesh"]["path"].GetString());
-    printf("Object's mesh id: %d\n", meshId);
+
+    //printf("Object's mesh id: %d\n", meshId);
+
     vec3 dimensions = StrToVec3(it->value["dimensions"]["value"].GetString());
-    printf("Object's dimesions: %f %f %f\n", dimensions.x, dimensions.y, dimensions.z);
+
+    //printf("Object's dimesions: %f %f %f\n", dimensions.x, dimensions.y, dimensions.z);
 
     vec4 ambient = StrToVec4(it->value["Material"]["PhongParameters"]["ambient"].GetString());
     vec4 diffuse = StrToVec4(it->value["Material"]["PhongParameters"]["diffuse"].GetString());
     vec4 specular = StrToVec4(it->value["Material"]["PhongParameters"]["specular"].GetString());
     double shininess = std::stod(it->value["Material"]["PhongParameters"]["shininess"].GetString());
-    printf("Object's ambient: %f %f %f %f\n", ambient.r, ambient.g, ambient.b, ambient.a);
-    printf("Object's diffuse: %f %f %f %f\n", diffuse.r, diffuse.g, diffuse.b, diffuse.a);
-    printf("Object's specular: %f %f %f %f\n", specular.r, specular.g, specular.b, specular.a);
-    printf("Object's shininess: %f\n", shininess);
-    printf("Object's texture path: %s\n", it->value["Material"]["Texture"]["path"].GetString());
+
+    //printf("Object's ambient: %f %f %f %f\n", ambient.r, ambient.g, ambient.b, ambient.a);
+    //printf("Object's diffuse: %f %f %f %f\n", diffuse.r, diffuse.g, diffuse.b, diffuse.a);
+    //printf("Object's specular: %f %f %f %f\n", specular.r, specular.g, specular.b, specular.a);
+    //printf("Object's shininess: %f\n", shininess);
+    //printf("Object's texture path: %s\n", it->value["Material"]["Texture"]["path"].GetString());
+
     int textureId = manager.loadTexture(it->value["Material"]["Texture"]["path"].GetString());
     Material material = Material(ambient, diffuse, specular, shininess, textureId);
 
