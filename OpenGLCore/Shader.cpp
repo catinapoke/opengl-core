@@ -2,11 +2,9 @@
 #include <sstream>
 #include "Shader.h"
 
-
 #include <functional>
 #include <glm/mat4x2.hpp>
 #include <iostream>
-
 
 void Shader::create(const char* vertexPath, const char* fragmentPath)
 {
@@ -71,7 +69,7 @@ void Shader::setUniform(const std::string& name, glm::vec4 value)
 void Shader::setUniform(const std::string& name, glm::mat4 value)
 {
     GLuint location = getUniformLocation(name);
-    glUniformMatrix4fv(location, 1, false, glm::value_ptr(value));
+    glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
 unsigned int Shader::CompileShader(const char* shaderPath, int shaderType)

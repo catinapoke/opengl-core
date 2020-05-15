@@ -1,7 +1,7 @@
 ﻿#pragma once
-#include <glm/glm.hpp>
+#include "opengl.h"
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/vector_angle.hpp> 
+#include <glm/gtx/vector_angle.hpp>
 
 using vec3 = glm::vec3;
 using vec2 = glm::vec2;

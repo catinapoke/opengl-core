@@ -1,9 +1,12 @@
 ﻿#include <iostream>
 #include <GL/glew.h>
 #include "freeglut/freeglut.h"
+#include "glm/glm.hpp"
 #include "Data.h"
 #include "Display.h"
 #include "Simulation.h"
+#include <IL\ilu.h>
+#include <IL\ilut.h>
 
 const std::string TitleName = "OpenGLCore";
 
@@ -34,9 +37,17 @@ void OpenGLInit(int argc, char** argv)
     printf("Vendor - %s\n", glGetString(GL_VENDOR));
 }
 
+void DeVILInit()
+{
+    ilInit();
+    iluInit();
+    ilutInit();
+}
+
 int main(int argc, char** argv)
 {
     OpenGLInit(argc, argv);
+    DeVILInit();
     DataInit();
     printf("Data initialized\n");
     DisplayInit();

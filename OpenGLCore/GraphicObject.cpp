@@ -1,16 +1,32 @@
 #include "GraphicObject.h"
 
-GraphicObject::GraphicObject() :meshId(0), position(0), angleOY(0), color(0), modelMatrix(1)
-{
-};
+std::unordered_map<std::string, GraphicObjectType> graphicObjectTypeMap
+(
+    {
+        { "road", GraphicObjectType::road},
+        { "building", GraphicObjectType::building },
+        { "vehicle", GraphicObjectType::vehicle },
+        { "big_nature", GraphicObjectType::big_nature },
+        { "small_nature", GraphicObjectType::small_nature },
+        { "big_prop", GraphicObjectType::big_prop },
+        { "medium_prop", GraphicObjectType::medium_prop },
+        { "small_prop", GraphicObjectType::small_prop }
+    }
+);
 
-GraphicObject::GraphicObject(int meshId, Material material, vec3 _position, float _angle, vec4 _color = vec4(0)) : modelMatrix(1)
+GraphicObject::GraphicObject() :meshId(0), position(0), angleOY(0), color(0), modelMatrix(1), type(GraphicObjectType()), dimensions(glm::vec3())
+{
+}
+
+GraphicObject::GraphicObject(int meshId, vec4 color, vec3 position, float angle, Material material, GraphicObjectType type, glm::vec3 dimensions) : modelMatrix(1)
 {
     this->meshId = meshId;
+    this->position = position;
+    this->angleOY = angle;
+    this->color = color;
     this->material = material;
-    position = _position;
-    angleOY = _angle;
-    color = _color;
+    this->type = type;
+    this->dimensions = dimensions;
     recalculateModelMatrix();
 };
 
@@ -36,27 +52,57 @@ void GraphicObject::setAngleOY(float degree)
     recalculateModelMatrix();
 }
 
-void GraphicObject::setMaterial(Material& material)
+void GraphicObject::setMaterial(Material material)
 {
     this->material = material;
 }
 
-Material& GraphicObject::getMaterial()
+void GraphicObject::setType(GraphicObjectType type)
+{
+    this->type = type;
+}
+
+void GraphicObject::setDimensions(glm::vec3 dimensions)
+{
+    this->dimensions = dimensions;
+}
+
+const Material& GraphicObject::getMaterial()
 {
     return material;
 }
 
-int GraphicObject::getMeshId()
+const GraphicObjectType& GraphicObject::getType()
+{
+    return type;
+}
+
+const glm::vec3& GraphicObject::getDimensions()
+{
+    return dimensions;
+}
+
+const int& GraphicObject::getMeshId()
 {
     return meshId;
 }
 
-glm::vec4& GraphicObject::getColor()
+const glm::vec4& GraphicObject::getColor()
 {
     return color;
 }
 
-glm::mat4& GraphicObject::getModelMatrix()
+const glm::vec3& GraphicObject::getPosition()
+{
+    return position;
+}
+
+const float& GraphicObject::getAngleOY()
+{
+    return angleOY;
+}
+
+const glm::mat4& GraphicObject::getModelMatrix()
 {
     return modelMatrix;
 }

@@ -1,10 +1,10 @@
 #pragma once
-#include <GL/glew.h>
-#include "freeglut/freeglut.h"
 #include <cstdio>
+
+#include "opengl.h"
+
 #include "Timer.h"
 #include "Data.h"
-#include <glm/glm.hpp>
 
 extern void SimulationInit();
 extern void Simulate();

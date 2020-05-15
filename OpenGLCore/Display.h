@@ -1,8 +1,6 @@
 #pragma once
-#include <GL/glew.h>
-#include "freeglut/freeglut.h"
+#include "opengl.h"
 #include "Data.h"
-#include "glm/glm.hpp"
 #include "ResourceManager.h"
 
 extern void DisplayInit();

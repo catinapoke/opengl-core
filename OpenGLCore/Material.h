@@ -1,6 +1,5 @@
 #pragma once
-#include <GL/glew.h>
-#include "glm/glm.hpp";
+#include "opengl.h"
 // КЛАСС ДЛЯ РАБОТЫ С МАТЕРИАЛОМ
 class Material
 {
@@ -16,14 +15,14 @@ public:
     void setShininess(GLfloat shininess);
 
     // получение различных параметров источника света
-    glm::vec4& getAmbient();
-    glm::vec4& getDiffuse();
-    glm::vec4& getSpecular();
-    GLfloat getShininess();
+    glm::vec4& getAmbient() const;
+    glm::vec4& getDiffuse() const;
+    glm::vec4& getSpecular() const;
+    GLfloat getShininess() const;
 
     // установка и получение id-текстуры в менеджере ресурсов
     void setTextureId(int textureId);
-    int getTextureId();
+    int getTextureId() const;
 
 private:
     // id-текстуры в менеджере ресурсов

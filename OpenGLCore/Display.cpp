@@ -17,37 +17,23 @@ void DisplayInit()
 void Reshape(int w, int h)
 {
     glViewport(0, 0, static_cast<GLsizei>(w), static_cast<GLsizei>(h));
-    // устанавливаем матрицу проекции
     camera.setProjectionMatrix(60.0f, (float)w / h, 1.0f, 100.0f);
 };
 
-// функция вызывается при перерисовке окна
 void Display(void)
 {
-    // начинаем вывод нового кадра
-    // для удобства определяем ссылку на RenderManager
     RenderManager& renderManager = RenderManager::instance();
     renderManager.start();
 
-    // передаем указатель на камеру и источник света
-    renderManager.setCamera(&camera);
-    renderManager.setLight(&light);
+    scene.draw();
 
-    // добавляем в очередь все объекты, которые необходимо вывести
-    for (int i = 0; i < graphicObjects.size(); i++)
-    {
-        renderManager.addToRenderQueue(&graphicObjects[i]);
-    }
-
-    // завершаем построение кадра
     renderManager.finish();
 
-    // меняем передний и задний буферы цвета
     glutSwapBuffers();
 
-    // выводим количество FPS
     char tempStr[128];
-    sprintf_s(tempStr, "[%06.2f FPS] Laba_04", renderManager.getFPS());  glutSetWindowTitle(tempStr);
+    sprintf_s(tempStr, "[%06.2f FPS] Laba_05 %s", renderManager.getFPS(), scene.getSceneDescription());
+    glutSetWindowTitle(tempStr);
 };
 
 // функция вывода кубика с ребрами единичной длины

@@ -2,9 +2,7 @@
 #include <ctime>
 #include <vector>
 
-#include <GL/glew.h>
-#include "freeglut/freeglut.h"
-#include "glm/glm.hpp"
+#include "opengl.h"
 
 #include "ResourceManager.h"
 #include "Shader.h"

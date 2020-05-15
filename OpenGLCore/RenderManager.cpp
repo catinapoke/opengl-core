@@ -58,6 +58,8 @@ void RenderManager::finish()
 
     // активируем шейдер, используемый для вывода объекта
     shaders[0].use();
+
+    shaders[0].setUniform("texture_0", 0);
     shaders[0].setUniform("projectionMatrix", camera->getProjectionMatrix());
 
     // устанавливаем параметры источника света
@@ -69,6 +71,8 @@ void RenderManager::finish()
     // его необходимо преобразовать в систему координат наблюдателя
     shaders[0].setUniform("lPosition", viewMatrix * light->getDirection());
 
+    ResourceManager& manager = ResourceManager::instance();
+    Texture::unbind();
     // выводим все объекты
     for (int i = 0; i < graphicObjects.size(); i++) {
         // устанавливаем матрицу наблюдения модели
@@ -76,11 +80,12 @@ void RenderManager::finish()
         shaders[0].setUniform("modelViewMatrix", modelViewMatrix);
 
         // устанавливаем параметры материала
-        Material& material = graphicObjects[i]->getMaterial();
+        const Material& material = graphicObjects[i]->getMaterial();
         shaders[0].setUniform("mAmbient", material.getAmbient());
         shaders[0].setUniform("mDiffuse", material.getDiffuse());
         shaders[0].setUniform("mSpecular", material.getSpecular());
         shaders[0].setUniform("mShininess", material.getShininess());
+        manager.getTexture(material.getTextureId())->bind();
 
         // выводим меш
         int meshId = graphicObjects[i]->getMeshId();

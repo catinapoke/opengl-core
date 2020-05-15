@@ -1,5 +1,5 @@
 #pragma once
-#include <glm/glm.hpp>
+#include "opengl.h"
 #include <glm/gtc/matrix_transform.hpp>
 //#include <glm/gtx/transform.hpp>
 

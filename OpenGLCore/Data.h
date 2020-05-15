@@ -1,16 +1,15 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "Timer.h"
-#include <GL/glew.h>
 
-#include "freeglut/freeglut.h"
-#include "glm/glm.hpp";
+#include "opengl.h"
+#include "Timer.h"
 #include "Shader.h"
 #include "Camera.h"
 #include "GraphicObject.h"
 #include "Light.h"
 #include "Material.h"
+#include "Scene.h"
 
 using vec3 = glm::vec3;
 
@@ -29,8 +28,7 @@ extern Camera camera;
 extern Light light;
 extern Material material;
 
-extern std::vector<GraphicObject> graphicObjects;
+extern Scene scene;
 
 extern void DataInit();
 extern void SetUpShader();
-extern void initGraphicObjects();

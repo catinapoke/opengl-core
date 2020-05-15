@@ -1,10 +1,8 @@
 #pragma once
 #include <string>
 #include <map>
-#include <GL/glew.h>
 
-
-#include "freeglut/freeglut.h"
+#include "opengl.h"
 #include <glm/vec4.hpp>
 #include <glm/matrix.hpp>
 #include "glm/gtc/type_ptr.hpp"
