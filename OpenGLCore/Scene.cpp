@@ -55,7 +55,7 @@ bool Scene::loadFromJSON(std::string filename)
         return false;
 
     sceneFilename = filename;
-    printf("Loading scene - %s\n", filename);
+    std::cout << "Loading scene - " << sceneFilename << " !\n";
 
     const rapidjson::Value& membersObject = (*sceneDocument)["scene"];
     for (rapidjson::Value::ConstMemberIterator it = (*sceneDocument)["scene"].MemberBegin(); it != (*sceneDocument)["scene"].MemberEnd(); it++)
@@ -63,6 +63,9 @@ bool Scene::loadFromJSON(std::string filename)
         std::string id = it->value["Model"]["id"].GetString();
         vec3 position = StrToVec3(it->value["Position"]["value"].GetString());
         float rotation = std::atof(it->value["Rotation"]["value"].GetString());
+#if debug
+        printf_s("GameObject Id - %s Pos - (%f;%f;%f) Rotation - %f\n", id.c_str(), position.x, position.y, position.z, rotation);
+#endif
 
         GraphicObject graphicObject = createGraphicObject(id);
         graphicObject.setPosition(position);
@@ -70,7 +73,7 @@ bool Scene::loadFromJSON(std::string filename)
 
         graphicObjects.push_back(graphicObject);
     }
-    printf("Scene information - %s\n", getSceneDescription());
+    printf_s("Scene information - %s\n", getSceneDescription().c_str());
     return true;
 }
 
@@ -79,8 +82,8 @@ void Scene::draw()
 {
     RenderManager& renderManager = RenderManager::instance();
 
-    renderManager.setCamera(&camera);
-    renderManager.setLight(&light);
+    renderManager.setCamera(camera);
+    renderManager.setLight(light);
 
     for (int i = 0; i < graphicObjects.size(); i++)
     {
@@ -125,43 +128,58 @@ GraphicObject Scene::createGraphicObject(std::string str)
 
 Camera* Scene::getCamera()
 {
-    return &camera;
+    return camera;
+}
+
+void Scene::SetCamera(Camera* camera)
+{
+    this->camera = camera;
+}
+
+void Scene::SetLight(Light* light)
+{
+    this->light = light;
 }
 
 std::string Scene::getSceneDescription()
 {
-    return sceneFilename + ": " + std::to_string(graphicObjects.size()) + " objects";
+    std::stringstream strStream;
+    strStream << "Scene desc: " << sceneFilename << ": " << graphicObjects.size() << " objects";
+    std::string str = strStream.str();
+    return str;
 }
 
 GraphicObject Scene::createGraphicObject(rapidjson::Value::ConstMemberIterator it)
 {
+#if debug
     printf("Creating graphic object with id: %s\n", it->value["id"].GetString());
+#endif
     ResourceManager& manager = ResourceManager::instance();
 
     GraphicObjectType objectType = graphicObjectTypeMap[it->value["type"].GetString()];
-
-    //printf("Object type: %s\n", it->value["type"].GetString());
-    //printf("Object's mesh path: %s\n", it->value["Mesh"]["path"].GetString());
-
+#if debug
+    printf("Object type: %s\n", it->value["type"].GetString());
+    printf("Object's mesh path: %s\n", it->value["Mesh"]["path"].GetString());
+#endif
     int meshId = manager.loadMesh(it->value["Mesh"]["path"].GetString());
-
-    //printf("Object's mesh id: %d\n", meshId);
-
+#if debug
+    printf("Object's mesh id: %d\n", meshId);
+#endif
     vec3 dimensions = StrToVec3(it->value["dimensions"]["value"].GetString());
-
-    //printf("Object's dimesions: %f %f %f\n", dimensions.x, dimensions.y, dimensions.z);
-
+#if debug
+    printf("Object's dimesions: %f %f %f\n", dimensions.x, dimensions.y, dimensions.z);
+#endif
     vec4 ambient = StrToVec4(it->value["Material"]["PhongParameters"]["ambient"].GetString());
     vec4 diffuse = StrToVec4(it->value["Material"]["PhongParameters"]["diffuse"].GetString());
     vec4 specular = StrToVec4(it->value["Material"]["PhongParameters"]["specular"].GetString());
     double shininess = std::stod(it->value["Material"]["PhongParameters"]["shininess"].GetString());
-
-    //printf("Object's ambient: %f %f %f %f\n", ambient.r, ambient.g, ambient.b, ambient.a);
-    //printf("Object's diffuse: %f %f %f %f\n", diffuse.r, diffuse.g, diffuse.b, diffuse.a);
-    //printf("Object's specular: %f %f %f %f\n", specular.r, specular.g, specular.b, specular.a);
-    //printf("Object's shininess: %f\n", shininess);
-    //printf("Object's texture path: %s\n", it->value["Material"]["Texture"]["path"].GetString());
-
+#if debug
+    printf("Object's ambient: %f %f %f %f\n", ambient.r, ambient.g, ambient.b, ambient.a);
+    printf("Object's diffuse: %f %f %f %f\n", diffuse.r, diffuse.g, diffuse.b, diffuse.a);
+    printf("Object's specular: %f %f %f %f\n", specular.r, specular.g, specular.b, specular.a);
+    printf("Object's shininess: %f\n", shininess);
+    printf("Object's texture path: %s\n", it->value["Material"]["Texture"]["path"].GetString());
+#endif
     int textureId = manager.loadTexture(it->value["Material"]["Texture"]["path"].GetString());
     Material material = Material(ambient, diffuse, specular, shininess, textureId);
 

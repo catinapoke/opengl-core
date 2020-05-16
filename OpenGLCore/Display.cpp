@@ -9,7 +9,7 @@ void DisplayInit()
 {
     glutDisplayFunc(Display);
     glutReshapeFunc(Reshape);
-    camera.setProjectionMatrix(60.0f, (float)4 / 3, 1.0f, 100.0f);
+    camera->setProjectionMatrix(60.0f, (float)4 / 3, 1.0f, 100.0f);
     shader.use();
     Shader::disable();
 }
@@ -17,7 +17,7 @@ void DisplayInit()
 void Reshape(int w, int h)
 {
     glViewport(0, 0, static_cast<GLsizei>(w), static_cast<GLsizei>(h));
-    camera.setProjectionMatrix(60.0f, (float)w / h, 1.0f, 100.0f);
+    camera->setProjectionMatrix(60.0f, (float)w / h, 1.0f, 100.0f);
 };
 
 void Display(void)
@@ -32,7 +32,7 @@ void Display(void)
     glutSwapBuffers();
 
     char tempStr[128];
-    sprintf_s(tempStr, "[%06.2f FPS] Laba_05 %s", renderManager.getFPS(), scene.getSceneDescription());
+    sprintf_s(tempStr, "[%06.2f FPS] Laba_05 %s", renderManager.getFPS(), scene.getSceneDescription().c_str());
     glutSetWindowTitle(tempStr);
 };
 

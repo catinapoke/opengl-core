@@ -13,6 +13,8 @@
 #include "GraphicObject.h"
 #include "Light.h"
 
+#define debug 1
+
 // КЛАСС ДЛЯ РАБОТЫ СО СЦЕНОЙ
 class Scene
 {
@@ -35,6 +37,8 @@ public:
 
     // Получение камеры (для её модификации в некоторых функциях обратного вызова)
     Camera* getCamera();
+    void SetCamera(Camera* camera);
+    void SetLight(Light* light);
 
     // Получение информации о сцене (для отладки)
     std::string getSceneDescription();
@@ -49,9 +53,9 @@ private:
 
 private:
     // камера
-    Camera camera;
+    Camera* camera;
     // источник света
-    Light light;
+    Light* light;
     // все графические объекты
     std::vector<GraphicObject> graphicObjects;
     // json-документ в котором приводится описание всех моделей

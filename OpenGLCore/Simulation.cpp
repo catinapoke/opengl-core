@@ -37,7 +37,7 @@ void HandleInput(float milliseconds)
     if (movement == vec2(0))
         return;
 
-    camera.moveCenter(vec3(movement.x, 0, movement.y) * (milliseconds / 1000.0f) * moveSpeed);
+    camera->moveCenter(vec3(movement.x, 0, movement.y) * (milliseconds / 1000.0f) * moveSpeed);
 }
 
 void MouseHandler(int button, int state, int x, int y)
@@ -66,17 +66,17 @@ void MouseMove(int x, int y)
     else
         return;
     mousePosition = glm::vec2(x, y);
-    camera.rotate(delta * rotationSpeed);
+    camera->rotate(delta * rotationSpeed);
 }
 
 void mouseWheel(int button, int dir, int x, int y)
 {
     if (dir > 0) // Zoom in
     {
-        camera.zoomInOut(true);
+        camera->zoomInOut(true);
     }
     else // Zoom out
     {
-        camera.zoomInOut(false);
+        camera->zoomInOut(false);
     }
 }

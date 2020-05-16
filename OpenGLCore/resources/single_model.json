@@ -1,0 +1,25 @@
+{
+    "Models": {
+        "Model": {
+            "id": "sign_stop",
+            "type": "small prop",
+            "dimensions": {
+                "value": "0.380 1.276 0.038"
+            },
+            "Mesh": {
+                "path": "resources/meshes/props/traffic_sign_stop.obj"
+            },
+            "Material": {
+                "Texture": {
+                    "path": "resources/textures/props/traffic_props.png"
+                },
+                "PhongParameters": {
+                    "diffuse": "0.85 0.85 0.85",
+                    "ambient": "0.35 0.35 0.35",
+                    "specular": "0.25 0.25 0.25",
+                    "shininess": "64.0"
+                }
+            }
+        }
+    }
+}

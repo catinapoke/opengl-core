@@ -23,12 +23,14 @@ extern std::string shaderName;
 extern std::string shaderPath;
 extern Shader shader;
 
-extern Camera camera;
+extern Camera* camera;
 
 extern Light light;
 extern Material material;
 
 extern Scene scene;
+extern std::string modelInfo;
+extern std::string sceneInfo;
 
 extern void DataInit();
 extern void SetUpShader();

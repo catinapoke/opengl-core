@@ -35,6 +35,10 @@ void Texture::load(std::string filename)
     int format = ilGetInteger(IL_IMAGE_FORMAT);
     int type = ilGetInteger(IL_IMAGE_TYPE);
 
+#if debug
+    printf_s("Texture: %s; Width - %d; Height - %d; IL_Format - %d; IL_Type - %d\n", filename.c_str(), width, height, format, type);
+#endif
+
     ILinfo ImageInfo;
     iluGetImageInfo(&ImageInfo);
     if (ImageInfo.Origin == IL_ORIGIN_UPPER_LEFT)
@@ -48,18 +52,26 @@ void Texture::load(std::string filename)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    ilDeleteImage(imageId);
-    ilBindImage(0);
     glBindTexture(GL_TEXTURE_2D, 0);
+    ilBindImage(0);
+    ilDeleteImage(imageId);
+
 }
 
 void Texture::bind(GLenum texUnit)
 {
     glActiveTexture(texUnit);
+    glEnable(texUnit);
+    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, texIndex);
 }
 
 void Texture::unbind()
 {
+    int textureUnits = 0;
+    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &textureUnits);
+    for(int i = 0;i<textureUnits;i++)
+        glDisable(GL_TEXTURE0 + i);
     glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D);
 }

@@ -8,6 +8,8 @@
 #include <IL\ilu.h>
 #include <IL\ilut.h>
 
+
+
 const std::string TitleName = "OpenGLCore";
 
 void OpenGLInit(int argc, char** argv)

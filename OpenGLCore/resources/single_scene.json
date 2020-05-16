@@ -1,0 +1,15 @@
+{
+    "scene": {
+        "object": {
+            "Model": {
+                "id": "sign_stop"
+            },
+            "Position": {
+                "value": "0.0 0.0 0.0"
+            },
+            "Rotation": {
+                "value": "0.0"
+            }
+        }
+    }
+}

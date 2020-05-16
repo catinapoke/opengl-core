@@ -7,6 +7,8 @@
 #include "IL\ilu.h"
 #include "IL\ilut.h"
 
+#define debug 1
+
 // йкюяя дкъ пюанрш я рейярспни
 class Texture
 {
