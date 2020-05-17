@@ -13,3 +13,4 @@ Controls:
 <kbd>Mouse Wheel</kbd> - Camera zoom*(close/further)*  
 <kbd>LBM</kbd> -  Camera rotation *(hold and move)*  
 <kbd>WASD</kbd> - Camera movement  
+![](https://raw.githubusercontent.com/catinapoke/opengl-core/master/ver%205.1.gif)
