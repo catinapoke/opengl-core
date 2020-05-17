@@ -158,7 +158,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="CameraTrash.cpp" />
     <ClCompile Include="Data.cpp" />
     <ClCompile Include="Display.cpp" />
     <ClCompile Include="GraphicObject.cpp" />
@@ -176,7 +175,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="CameraTrash.h" />
     <ClInclude Include="Data.h" />
     <ClInclude Include="Display.h" />
     <ClInclude Include="GraphicObject.h" />

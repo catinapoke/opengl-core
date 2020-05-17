@@ -33,4 +33,5 @@ extern std::string modelInfo;
 extern std::string sceneInfo;
 
 extern void DataInit();
-extern void SetUpShader();
+extern void ShaderInit();
+extern void SceneInit();

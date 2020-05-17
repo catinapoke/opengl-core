@@ -9,8 +9,6 @@
 class ResourceManager
 {
 public:
-    // Статик-метод для получения экземпляра менеджера ресурса.
-    // Всегда будет возвращена ссылка на объект, хранящийся в единственном экземпляре.
     static ResourceManager& instance()
     {
         static ResourceManager ResourceManager;

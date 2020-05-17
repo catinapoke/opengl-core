@@ -21,7 +21,7 @@ struct Vertex
     // вектор нормали
     GLfloat normal[3];
     // текстурные координаты нулевого текстурного блока
-    GLfloat textureCoord[3];
+    GLfloat textureCoord[2];
 };
 
 // КЛАСС ДЛЯ РАБОТЫ С МЕШЕМ
@@ -38,8 +38,8 @@ public:
 
 private:
     GLuint VAO;
-    GLuint vertexBufferObject;
-    GLuint indexBufferObject;
+    GLuint VBO;
+    GLuint EBO;
 
     std::vector<Vertex> vertices;
     std::vector<int> indices;

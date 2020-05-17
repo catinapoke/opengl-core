@@ -33,30 +33,33 @@ public:
     // Вывод всей сцены (посредством обращения к RenderManager)
     void draw();
 
-    GraphicObject createGraphicObject(std::string str);
-
-    // Получение камеры (для её модификации в некоторых функциях обратного вызова)
+    // Получение и установка камеры сцены
     Camera* getCamera();
     void SetCamera(Camera* camera);
+
+    // Установка света
     void SetLight(Light* light);
 
     // Получение информации о сцене (для отладки)
     std::string getSceneDescription();
 
 private:
-    // создание объекта по его идентификатору в xml-файле ("models.xml")
+    // создание объекта по его идентификатору в json-файле ("models.xml")
+    GraphicObject createGraphicObject(std::string str);
+    // создание объекта по ссылке на его описание в rapidjson::Document
     GraphicObject createGraphicObject(rapidjson::Value::ConstMemberIterator it);
-    std::unordered_map<std::string, rapidjson::Value::ConstMemberIterator> objectInfo;
+    // Чтение rapidjson::Document из файла filename
     rapidjson::Document* GetJsonDocument(std::string filename);
+    // Преобразование строк в вектора с помощью потоков
     vec3 StrToVec3(std::string str);
     vec4 StrToVec4(std::string str);
 
 private:
-    // камера
+    // Камера
     Camera* camera;
-    // источник света
+    // Источник света
     Light* light;
-    // все графические объекты
+    // Все графические объекты сцены
     std::vector<GraphicObject> graphicObjects;
     // json-документ в котором приводится описание всех моделей
     rapidjson::Document* modelsDescription;

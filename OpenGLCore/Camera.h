@@ -1,7 +1,10 @@
 ﻿#pragma once
 #include "opengl.h"
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtx/vector_angle.hpp>
+#include <GLM/glm.hpp>
+#include <GLM/gtx/transform.hpp>
+#include <GLM/gtc/type_ptr.hpp>
+#include <GLM/gtx/polar_coordinates.hpp>
+#include <GLM/gtx/euler_angles.hpp>
 
 using vec3 = glm::vec3;
 using vec2 = glm::vec2;
@@ -16,11 +19,11 @@ public:
     void setPosition(glm::vec3 position);
     glm::vec3 getPosition();
 
-    void rotateLeftRight(float miliseconds = 1000);
-    void rotateUpDown(float miliseconds = 1000);
     void zoomInOut(bool closer);
     void rotate(vec2 delta);
-    void moveCenter(vec3 delta);
+    void update();
+    void calcSpherical();
+    void moveCenter(vec2 delta);
 
     void setProjectionMatrix(float fovy, float aspect, float zNear, float zFar);
     glm::mat4& getProjectionMatrix();
@@ -31,22 +34,15 @@ public:
     glm::mat4 getModelViewMatrix(glm::mat4 modelMatrix) const;
 
 private:
-    void updateViewMatrix();
     void setViewMatrix(glm::vec3 cameraPosition, glm::vec3 target, glm::vec3 upVector);
-    vec3 cartesianToSpherical(vec3 decartes);
-    vec3 sphericalToCartesian(vec3 polar);
+
 
 private:
-    vec3 degree;	// (horizontal, vertical, radius)
-    vec3 position;	// Расположение камеры
-    vec2 speed;		// speed.x - radians, speed.y - zoom
-    glm::vec3 center; // Куда смотреть
-    glm::vec3 up;     // Вектор вверх
+    vec3 spherical;	       // r phi theta
+    vec3 position;	       // Расположение камеры
+    vec2 speed;		       // speed.x - radians, speed.y - zoom
+    glm::vec3 lookAtPoint; // Куда смотреть
 
     glm::mat4 projectionMatrix;
     glm::mat4 viewMatrix;
-
-    static const float radian360; // 360 degrees = 6.283185 radians
-    static const float radian85;
-    static const float radian5;
 };

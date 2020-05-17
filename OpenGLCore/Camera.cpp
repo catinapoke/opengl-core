@@ -1,9 +1,5 @@
 #include "Camera.h"
 
-const float Camera::radian360 = 6.283185f; // 360 degrees = 6.283185 radians
-const float Camera::radian85 = 1.48353f;
-const float Camera::radian5 = 0.087266f;
-
 Camera::Camera(vec2 _speed) :Camera(vec3(2), _speed)
 {
 }
@@ -14,40 +10,32 @@ Camera::Camera(float x, float y, float z, float degrees, float zoom) : Camera(ve
 
 Camera::Camera(vec3 position, vec2 _speed)
 {
-    setPosition(position);
     speed = _speed;
     speed.x = glm::radians(speed.x);
 
-    center = vec3(0.f, 0.f, 0.f);
-    up = vec3(0.f, 1.f, 0.f);
-    updateViewMatrix();
+    this->position = position;
+    this->lookAtPoint = vec3(0);
+    calcSpherical();
+    update();
 }
 
 void Camera::setPosition(vec3 _position)
 {
     position = _position;
-    degree = cartesianToSpherical(position - center);
-
-    updateViewMatrix();
+    calcSpherical();
+    update();
 }
 
-void Camera::moveCenter(vec3 delta)
+void Camera::moveCenter(vec2 delta)
 {
-    delta = vec3(delta.x, delta.y, -delta.z);
-    glm::vec3 cameraDirection = glm::normalize(position - center);
-    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-    //glm::vec3 cameraRight = glm::normalize(glm::cross(up, cameraDirection));
-
-    float dem = glm::orientedAngle(vec3(0.0f, 0.0f, 1.0f), cameraDirection, up);
-    printf("Dir: %f %f %f\n", cameraDirection.x, cameraDirection.y, cameraDirection.z);
-    printf("Angle: %f rad = %f\n", dem, glm::degrees(dem));
-    printf("Delta before: %f %f %f", delta.x, delta.y, delta.z);
-    delta = glm::rotateY(delta, dem);
-    printf(" Delta: %f %f %f\n", delta.x, delta.y, delta.z);
-
-    center += delta;
-    position += delta;
-    updateViewMatrix();
+    vec3 lookEye = lookAtPoint - position;
+    lookEye.y = 0;
+    vec3 forward = normalize(lookEye);
+    vec3 right = cross(vec3(0, 1, 0), forward);
+    vec3 dpos = forward * delta.x + right * delta.y;
+    this->position += dpos;
+    this->lookAtPoint += dpos;
+    update();
 }
 
 vec3 Camera::getPosition()
@@ -55,50 +43,43 @@ vec3 Camera::getPosition()
     return position;
 }
 
+// Delta.x - horizontal, delta.y - vertical
 void Camera::rotate(vec2 delta)
 {
-    rotateLeftRight(delta.x);
-    rotateUpDown(delta.y);
-    updateViewMatrix();
+    this->spherical.y += delta.x;
+    if (spherical.y < -360 || spherical.y > 360)
+        spherical.y -= spherical.y;
+    this->spherical.z = glm::clamp<float>(spherical.z + delta.y, 5.0f, 85.0f);
+    update();
 }
 
-void Camera::rotateLeftRight(float delta)
+void Camera::update()
 {
-    degree.x += delta * speed.x;
-    if (degree.x > radian360)
-        degree.x -= radian360;
-    else if (degree.x < 0)
-        degree.x += radian360;
-
-    position = sphericalToCartesian(degree) + center;
+    glm::mat4 R = glm::yawPitchRoll<float>(-glm::radians(spherical.y), -glm::radians(spherical.z), 0);
+    glm::vec4 T = R * glm::vec4(0, 0, spherical.x, 0);
+    position = lookAtPoint + vec3(T);
+    this->viewMatrix = glm::lookAt(this->position, this->lookAtPoint, vec3(0, 1, 0));
+    // debug();
 }
 
-void Camera::rotateUpDown(float delta)
+void Camera::calcSpherical()
 {
-    degree.y += delta * speed.x;
-    if (degree.y > radian85)
-        degree.y = radian85;
-    else
-    {
-        if (degree.y < radian5)
-            degree.y = radian5;
-    }
+    float dist = glm::distance(lookAtPoint, position);
 
-    position = sphericalToCartesian(degree) + center;
+    vec3 projXY = vec3(position.x, position.y, 0);
+    vec3 projZX = vec3(position.x, 0, position.z);
+    this->spherical = vec3(
+        dist,
+        glm::degrees((glm::acos(glm::dot(glm::normalize(position), glm::normalize(projZX))))),	// PHI Y
+        glm::degrees(glm::acos(glm::dot(glm::normalize(projXY), glm::normalize(projZX))))		// THETA Z
+    );
 }
 
 void Camera::zoomInOut(bool closer)
 {
-    degree.z += (closer ? -1 : 1) * speed.y;
-
-    if (degree.z < 1)
-        degree.z = 1;
-    else if (degree.z > 50)
-        degree.z = 50;
-
-    position = sphericalToCartesian(degree) + center;
-
-    updateViewMatrix();
+    float distance = (closer ? -1 : 1) * speed.y;
+    this->spherical.x = glm::clamp<float>(this->spherical.x + distance, 3.0f, 120.0f);
+    update();
 }
 
 void Camera::setProjectionMatrix(float fovy, float aspect, float zNear, float zFar)
@@ -136,50 +117,4 @@ glm::mat4 Camera::getModelViewMatrix(glm::mat4 modelMatrix) const
 void Camera::setViewMatrix(glm::vec3 cameraPosition, glm::vec3 target, glm::vec3 upVector)
 {
     viewMatrix = glm::lookAt(cameraPosition, target, upVector);
-}
-
-void Camera::updateViewMatrix()
-{
-    setViewMatrix(position, center, up);
-}
-
-
-vec3 Camera::cartesianToSpherical(vec3 cartesian)
-{
-    vec3 polar;
-    if (cartesian.z == 0)
-    {
-        if (cartesian.x > 0)
-            polar.x = 1.570796;// 90 deg = 1.570796 rad
-        else
-            polar.x = 4.712389;// 270 degree
-    }
-    else
-        polar.x = atan(cartesian.x / cartesian.z);
-
-    double OM = sqrt(cartesian.x * cartesian.x + cartesian.z * cartesian.z);
-
-    if (OM == 0)
-    {
-        if (cartesian.y > 0)
-            polar.y = 1.570796;// 90 deg = 1.570796 rad
-        else
-            polar.y = 4.712389;// 270 degree
-    }
-    else
-        polar.y = atan(cartesian.y / OM);
-
-    polar.z = sqrt(cartesian.y * cartesian.y + OM * OM);
-
-    return polar;
-}
-
-vec3 Camera::sphericalToCartesian(vec3 polar)
-{
-    vec3 cartesian;
-    cartesian.y = polar.z * sin(polar.y);
-    float OM = polar.z * cos(polar.y);
-    cartesian.z = OM * cos(polar.x);
-    cartesian.x = OM * sin(polar.x);
-    return cartesian;
 }

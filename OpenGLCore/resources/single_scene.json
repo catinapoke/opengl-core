@@ -2,7 +2,7 @@
     "scene": {
         "object": {
             "Model": {
-                "id": "sign_stop"
+                "id": "solar_pan"
             },
             "Position": {
                 "value": "0.0 0.0 0.0"

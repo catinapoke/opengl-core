@@ -2,7 +2,7 @@
 
 bool leftClick = false;
 glm::vec2 mousePosition = glm::vec2(0);
-const float moveSpeed = 20.0f;
+const float moveSpeed = 10.0f;
 const float rotationSpeed = 0.25f;
 
 void SimulationInit()
@@ -26,18 +26,18 @@ void HandleInput(float milliseconds)
 {
     vec2 movement = { 0,0 };
     if (GetAsyncKeyState(0x57)) // W
-        movement.y += 1;
-    if (GetAsyncKeyState(0x53)) // S
-        movement.y -= 1;
-    if (GetAsyncKeyState(0x41)) // A
-        movement.x -= 1;
-    if (GetAsyncKeyState(0x44)) // D
         movement.x += 1;
+    if (GetAsyncKeyState(0x53)) // S
+        movement.x -= 1;
+    if (GetAsyncKeyState(0x41)) // A
+        movement.y += 1;
+    if (GetAsyncKeyState(0x44)) // D
+        movement.y -= 1;
 
     if (movement == vec2(0))
         return;
 
-    camera->moveCenter(vec3(movement.x, 0, movement.y) * (milliseconds / 1000.0f) * moveSpeed);
+    camera->moveCenter(vec2(movement.x, movement.y) * (milliseconds / 1000.0f) * moveSpeed);
 }
 
 void MouseHandler(int button, int state, int x, int y)

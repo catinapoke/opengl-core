@@ -4,21 +4,6 @@
 void Scene::init(std::string filename)
 {
     modelsDescription = GetJsonDocument(filename);
-
-    //const rapidjson::Value& membersObject = modelsDescription["Models"];
-    //std::cout << "Scene members: \n";
-    //int k = 0;
-    //std::cout<< "array " << membersObject.Capacity() << "\n";
-    //for (rapidjson::Value::ConstMemberIterator it = modelsDescription["Models"].MemberBegin(); it != modelsDescription["Models"].MemberEnd(); it++)
-    //{
-    //    std::cout << k << ") ";
-    //    std::cout << it->name.GetString() << " - ";
-    //    std::cout << it->value["id"].GetString() << "\n";
-    //    
-    //    objectInfo[it->value["id"].GetString()] = it;
-    //    //std::cout << it->name.GetString() << "\n";
-    //    k++;
-    //}
 }
 
 rapidjson::Document* Scene::GetJsonDocument(std::string filename)
@@ -66,7 +51,6 @@ bool Scene::loadFromJSON(std::string filename)
 #if debug
         printf_s("GameObject Id - %s Pos - (%f;%f;%f) Rotation - %f\n", id.c_str(), position.x, position.y, position.z, rotation);
 #endif
-
         GraphicObject graphicObject = createGraphicObject(id);
         graphicObject.setPosition(position);
         graphicObject.setAngleOY(rotation);
@@ -111,15 +95,8 @@ vec4 Scene::StrToVec4(std::string str)
 
 GraphicObject Scene::createGraphicObject(std::string str)
 {
-    //printf_s("Request graphic object with id: %s\n", str);
-
-    //std::unordered_map<std::string, rapidjson::Value::ConstMemberIterator>::const_iterator iterator;
-    //iterator = objectInfo.find(str);
-    //if (iterator == objectInfo.end())
-    //    throw new std::exception("Can't find object info");
-    //return createGraphicObject(iterator->second);
-
-    for (rapidjson::Value::ConstMemberIterator it = (*modelsDescription)["Models"].MemberBegin(); it != (*modelsDescription)["Models"].MemberEnd(); it++)
+    for (rapidjson::Value::ConstMemberIterator it = (*modelsDescription)["Models"].MemberBegin(); 
+        it != (*modelsDescription)["Models"].MemberEnd(); it++)
     {
         if (it->value["id"].GetString() == str)
             return createGraphicObject(it);

@@ -1,17 +1,17 @@
 {
     "Models": {
         "Model": {
-            "id": "sign_stop",
+            "id": "solar_pan",
             "type": "small prop",
             "dimensions": {
-                "value": "0.380 1.276 0.038"
+                "value": "1.714 0.330 1.072"
             },
             "Mesh": {
-                "path": "resources/meshes/props/traffic_sign_stop.obj"
+                "path": "resources/meshes/props/roof_solar_panel.obj"
             },
             "Material": {
                 "Texture": {
-                    "path": "resources/textures/props/traffic_props.png"
+                    "path": "resources/textures/props/roof_props.png"
                 },
                 "PhongParameters": {
                     "diffuse": "0.85 0.85 0.85",
