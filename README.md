@@ -11,5 +11,5 @@ FPS and scene info in header
 
 Controls:  
 <kbd>Mouse Wheel</kbd> - Camera zoom*(close/further)*  
-<kdd>LBM</kbd> -  Camera rotation *(hold and move)*
+<kbd>LBM</kbd> -  Camera rotation *(hold and move)*  
 <kbd>WASD</kbd> - Camera movement  
