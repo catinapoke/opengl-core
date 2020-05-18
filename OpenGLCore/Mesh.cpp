@@ -16,124 +16,268 @@ std::string ivec3ToString(ivec3 vec)
     return std::string(buffer);
 }
 
-bool Mesh::load(std::string filePath)
+bool Mesh::load(std::string filename)
 {
-	// Open the file and check if it's opened
-	std::ifstream meshFile;
-	meshFile.open(filePath);
-	if (!meshFile.is_open())
-	{
-		printf("Cannot open the file: %s\n", filePath.c_str());
-		return false;
-	}
+    printf("Processing file: %s\n", filename.c_str());
+    std::ifstream file;
+    file.open(filename);
+    if (!file.is_open()) {
+        printf("Cannot open file %s\n", filename.c_str());
+        return false;
+    };
 
-	std::vector<vec3> coordinates;
-	std::vector<vec2> texCoords;
-	std::vector<vec3> normals;
-	std::vector<vec3> faces;
-	char lineEnd[512];
-	while (!meshFile.eof())
-	{
-		char ch;
-		std::string inputString;
-		meshFile >> inputString;
+    std::string s; // First word in line
+    char temp[512]; // Line residue
+    std::vector<vec3> v; // Coords
+    std::vector<vec3> vn; // Normals
+    std::vector<vec2> vt; // Texture coords
+    std::vector<ivec3> faces; // Polygons
+    std::map<std::string, int> vertexToIndex;
 
-		if (inputString == "v")
-		{
-			vec3 coords;
-			meshFile >> coords.x;
-			meshFile >> coords.y;
-			meshFile >> coords.z;
-			coordinates.push_back(coords);
-		}
-		else if (inputString == "vt")
-		{
-			vec2 textureCoordinates;
-			meshFile >> textureCoordinates.s;
-			meshFile >> textureCoordinates.t;
-			texCoords.push_back(textureCoordinates);
-		}
-		else if (inputString == "vn")
-		{
-			vec3 normal_coords;
-			meshFile >> normal_coords.x;
-			meshFile >> normal_coords.y;
-			meshFile >> normal_coords.z;
+    while (!file.eof()) {
+        file >> s;
+        if (s == "v") // Coords
+        {
+            vec3 coords;
+            file >> coords.x;
+            file >> coords.y;
+            file >> coords.z;
+            v.push_back(coords);
+        }
+        else if (s == "vn") // Normals
+        {
+            vec3 normals;
+            file >> normals.x;
+            file >> normals.y;
+            file >> normals.z;
+            vn.push_back(normals);
+        }
+        else if (s == "vt") // Textures
+        {
+            vec2 textureCoords;
+            file >> textureCoords.x;
+            file >> textureCoords.y;
+            vt.push_back(textureCoords);
+        }
+        else if (s == "f") {
+            for (int i = 0; i < 3; i++)
+            {
+                ivec3 fTemp;
+                char temp_c;
+                file >> fTemp.x;
+                file >> temp_c;
+                file >> fTemp.y;
+                file >> temp_c;
+                file >> fTemp.z;
+                faces.push_back(fTemp);
+            }
+        }
+        file.getline(temp, 512);
+    };
+    file.close();
+    printf("File proceeded\n");
+    vertices = std::vector<Vertex>(0);
 
-			normals.push_back(normal_coords);
-		}
-		else if (inputString == "f")
-		{
-			for (int i = 0; i < 3; i++)
-			{
-				vec3 face;
-				meshFile >> face.x;
-				meshFile >> ch;
-				meshFile >> face.y;
-				meshFile >> ch;
-				meshFile >> face.z;
-				faces.push_back(face);
-			}
-		}
-		meshFile.getline(lineEnd, 512);
-	}
-	// Close the file
-	meshFile.close();
+    for (auto it : faces)
+    {
+        vec3 coord = v[it.x - 1];
+        vec3 normals = vn[it.z - 1];
+        vec2 textureCoords = vt[it.y - 1];
 
-	std::map<std::string, int> m;
+        std::string faceString = std::to_string(it.x) + "/" + std::to_string(it.y) + "/" + std::to_string(it.z);
 
-	// Make a vertices
-	for (auto it : faces)
-	{
-		vec3 vCoord = coordinates[it.x - 1];
-		vec2 vTexCoord = texCoords[it.y - 1];
-		vec3 vNormal = normals[it.z - 1];
-		std::string str = std::to_string(it.x) + '/' + std::to_string(it.y) + '/' + std::to_string(it.z);
+        auto vertex = vertexToIndex.find(faceString);
 
-		auto v = m.find(str);
-		if (v == m.end())
-		{
-			Vertex tmp{ {vCoord.x, vCoord.y, vCoord.z}, {vNormal.x, vNormal.y, vNormal.z}, {vTexCoord.s, vTexCoord.t} };
-			vertices.push_back(tmp);
-			m.emplace(str, vertices.size() - 1);
-		}
-		indices.push_back(m[str]);
-	}
-	printf("Vertices loaded: %i\n", vertices.size());
-	printf("Vertex count - %i\n Indices count - %i \n", static_cast<int>(vertices.size()), static_cast<int>(indices.size()));
+        if (vertex != vertexToIndex.end())
+        {
+            indices.push_back((GLuint)(vertex->second));
+        }
+        else
+        {
+            Vertex tmp = { { coord.x, coord.y, coord.z }, { normals.x, normals.y, normals.z }, { textureCoords.s, textureCoords.t } };
+            vertices.push_back(tmp);
+            indices.push_back(vertices.size() - 1);
+            vertexToIndex.emplace(faceString, vertices.size() - 1);
+        }
+    }
+    file.close();
+    printf("File proceeded\n");
 
-	GLint buffers[2];
-	// Generate buffers
-	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
+    printf("Vertex count - %i\n Indices count - %i \n\n", static_cast<int>(faces.size()), static_cast<int>(indices.size()));
 
+    printf("Vertices\n");
+    for (int i = 0; i < vertices.size(); i++)
+    {
+        printf("%d) P: %f %f %f N: %f %f %f T: %f %f\n", i,
+            vertices[i].coord[0], vertices[i].coord[1], vertices[i].coord[2],
+            vertices[i].normal[0], vertices[i].normal[1], vertices[i].normal[2],
+            vertices[i].textureCoord[0], vertices[i].textureCoord[1]
+        );
+    }
+    printf("Indices\n");
+    for (int i = 0; i < indices.size(); i += 3)
+    {
+        printf("%d %d %d\n", indices[i], indices[i + 1], indices[i + 2]);
+    }
 
-	// VBO
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+    GLuint buffers[2];
+    glGenBuffers(2, buffers);
+    glGenVertexArrays(1, &VAO);
+    VBO = buffers[0];//VBO
+    EBO = buffers[1];
 
-	// VAO
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Vertex::coord));	// 0 is vertex coordinate data
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Vertex::normal));	// 1 is vertex normal data
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, Vertex::textureCoord)); // 2 is vertex texture coordinate data
-	glEnableVertexAttribArray(2);
+    glBindVertexArray(VAO);
 
-	// EBO
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
-	// Unbind all buffers
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), indices.data(), GL_STATIC_DRAW);
 
-	return true;
+    int location = 0;
+    glVertexAttribPointer(location, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, coord));
+    glEnableVertexAttribArray(location);
+
+    location = 1;
+    glVertexAttribPointer(location, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, normal));
+    glEnableVertexAttribArray(location);
+
+    location = 2;
+    glVertexAttribPointer(location, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, textureCoord));
+    glEnableVertexAttribArray(location);
+
+    
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    return true;
 }
+#if 0
+bool Mesh::oldLoad(std::string filename)
+{
+    printf("Processing file: %s\n", filename.c_str());
+    std::ifstream file;
+    file.open(filename);
+    if (!file.is_open()) {
+        printf("Cannot open file %s\n", filename.c_str());
+        return false;
+    };
 
+    std::string s; // First word in line
+    char temp[512]; // Line residue
+    std::vector<vec3> v; // Coords
+    std::vector<vec3> vn; // Normals
+    std::vector<vec2> vt; // Texture coords
+    std::vector<ivec3> faces; // Polygons
+    std::map<std::string, int> vertexToIndex;
+
+    while (!file.eof()) {
+        file >> s;
+        if (s == "v") // Coords
+        {
+            vec3 coords;
+            file >> coords.x;
+            file >> coords.y;
+            file >> coords.z;
+            v.push_back(coords);
+        }
+        else if (s == "vn") // Normals
+        {
+            vec3 normals;
+            file >> normals.x;
+            file >> normals.y;
+            file >> normals.z;
+            vn.push_back(normals);
+        }
+        else if (s == "vt") // Textures
+        {
+            vec2 textureCoords;
+            file >> textureCoords.x;
+            file >> textureCoords.y;
+            vt.push_back(textureCoords);
+        }
+        else if (s == "f") {
+            for (int i = 0; i < 3; i++)
+            {
+                ivec3 fTemp;
+                char temp_c;
+                file >> fTemp.x;
+                file >> temp_c;
+                file >> fTemp.y;
+                file >> temp_c;
+                file >> fTemp.z;
+
+                fTemp = ivec3(fTemp.x - 1, fTemp.y - 1, fTemp.z - 1);
+                std::string faceString = std::to_string(fTemp.x) + "/" + std::to_string(fTemp.y) + "/" + std::to_string(fTemp.z);
+
+                auto vertex = vertexToIndex.find(faceString);
+                if (vertex != vertexToIndex.end())
+                {
+                    indices.push_back((GLuint)(vertex->second));
+                }
+                else
+                {
+                    Vertex tmp = { { v[fTemp.x].x, v[fTemp.x].y, v[fTemp.x].z }, { vn[fTemp.z].x, vn[fTemp.z].y, vn[fTemp.z].z }, { vt[fTemp.y].s, vt[fTemp.y].t } };
+                    vertices.push_back(tmp);
+                    indices.push_back(vertices.size() - 1);
+                    vertexToIndex.emplace(faceString, vertices.size() - 1);
+                }
+            }
+        }
+        file.getline(temp, 512);
+    };
+    file.close();
+    printf("File proceeded\n");
+
+    printf("Vertex count - %i\n Indices count - %i \n\n", static_cast<int>(vertices.size()), static_cast<int>(indices.size()));
+    printf("Vertices\n");
+    for (int i = 0; i < vertices.size(); i++)
+    {
+        printf("%d) P: %f %f %f N: %f %f %f T: %f %f\n", i,
+            vertices[i].coord[0], vertices[i].coord[1], vertices[i].coord[2],
+            vertices[i].normal[0], vertices[i].normal[1], vertices[i].normal[2],
+            vertices[i].textureCoord[0], vertices[i].textureCoord[1]
+        );
+    }
+    printf("Indices\n");
+    for (int i = 0; i < indices.size(); i += 3)
+    {
+        printf("%d %d %d\n", indices[i], indices[i + 1], indices[i + 2]);
+    }
+
+    GLuint buffers[2];
+    glGenBuffers(2, buffers);
+    glGenVertexArrays(1, &VAO);
+    VBO = buffers[0];//VBO
+    EBO = buffers[1];
+
+    glBindVertexArray(VAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), indices.data(), GL_STATIC_DRAW);
+
+    int location = 0;
+    glVertexAttribPointer(location, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, coord));
+    glEnableVertexAttribArray(location);
+
+    location = 1;
+    glVertexAttribPointer(location, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, normal));
+    glEnableVertexAttribArray(location);
+
+    location = 2;
+    glVertexAttribPointer(location, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, textureCoord));
+    glEnableVertexAttribArray(location);
+
+    
+    glBindVertexArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    return true;
+}
+#endif
 void Mesh::draw()
 {
     glBindVertexArray(VAO);

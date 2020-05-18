@@ -13,7 +13,7 @@
 #include "GraphicObject.h"
 #include "Light.h"
 
-#define debug 1
+#define debug 0
 
 // йкюяя дкъ пюанрш ян яжемни
 class Scene

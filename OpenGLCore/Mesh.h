@@ -33,6 +33,7 @@ public:
     Mesh(std::string filename);
     // загрузка меша из внешнего obj-файла
     bool load(std::string filename);
+    bool oldLoad(std::string filename);
     // вывод меша
     void draw();
 
