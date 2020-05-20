@@ -75,7 +75,7 @@ bool Mesh::load(std::string filename)
         file.getline(temp, 512);
     };
     file.close();
-    printf("File proceeded\n");
+    // printf("File proceeded\n");
     vertices = std::vector<Vertex>(0);
 
     for (auto it : faces)
@@ -100,9 +100,9 @@ bool Mesh::load(std::string filename)
             vertexToIndex.emplace(faceString, vertices.size() - 1);
         }
     }
-    file.close();
-    printf("File proceeded\n");
+    //printf("File proceeded\n");
 
+#if debug
     printf("Vertex count - %i\n Indices count - %i \n\n", static_cast<int>(faces.size()), static_cast<int>(indices.size()));
 
     printf("Vertices\n");
@@ -119,6 +119,7 @@ bool Mesh::load(std::string filename)
     {
         printf("%d %d %d\n", indices[i], indices[i + 1], indices[i + 2]);
     }
+#endif
 
     GLuint buffers[2];
     glGenBuffers(2, buffers);
@@ -152,6 +153,7 @@ bool Mesh::load(std::string filename)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     return true;
 }
+
 #if 0
 bool Mesh::oldLoad(std::string filename)
 {
@@ -278,6 +280,7 @@ bool Mesh::oldLoad(std::string filename)
     return true;
 }
 #endif
+
 void Mesh::draw()
 {
     glBindVertexArray(VAO);
