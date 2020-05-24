@@ -7,10 +7,20 @@
 4. [RapidJson](https://github.com/Tencent/rapidjson/) - A fast JSON parser/generator for C++ with both SAX/DOM style API
 
 **Program in action**
-FPS and scene info in header
+1. Header:
+    1. FPS
+    1. drawcalls and material changes count
+    1. ScenePath 
+    1. Objects count
+2. Instanced DrawCalls
+3. Loading models info and scene configuration from .json files
+4. Orbital camera with moving center
+5. Level-of-details: unload object if it's further than render distance
+6. Phong lightning with textures support
 
 Controls:  
 <kbd>Mouse Wheel</kbd> - Camera zoom*(close/further)*  
 <kbd>LBM</kbd> -  Camera rotation *(hold and move)*  
 <kbd>WASD</kbd> - Camera movement  
-![](https://raw.githubusercontent.com/catinapoke/opengl-core/master/ver%205.1.gif)
+
+![](https://raw.githubusercontent.com/catinapoke/opengl-core/master/app.gif)
