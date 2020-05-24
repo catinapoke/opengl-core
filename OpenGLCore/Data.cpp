@@ -23,7 +23,7 @@ Light light;
 Material material;
 
 Scene scene;
-std::string modelInfo = "resources/models.json"; // models, single_model
+std::string modelInfo = "resources/models2.json"; // models, single_model
 std::string sceneInfo = "resources/demo_scene2.json"; // demo_scene, demo_scene2, single_scene
 
 void DataInit()
