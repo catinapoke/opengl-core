@@ -40,15 +40,20 @@ public:
 
     // получение количество FPS
     float getFPS();
+    int getDrawCalls();
+    int getMaterialChanges();
 
 private:
     // конструктор по умолчанию (приватный)
-    RenderManager() :startTime(clock()), FPS(0), light(nullptr), camera(nullptr) {};
+    RenderManager() :startTime(clock()), FPS(0), light(nullptr), camera(nullptr), elapsedTime(0), frames(0), materialChanges(0), drawCalls(0) {};
     // конструктора копирования нет
     RenderManager(const RenderManager& root) = delete;
     // оператора присваивания нет
     RenderManager& operator=(const RenderManager&) = delete;
 
+    void SetRenderMaterial(Material* material);
+    void DrawSingle(Shader& shader, std::vector<glm::mat4>& modelView, Mesh* mesh);
+    void DrawInstanced(Shader& shader, std::vector<glm::mat4>& modelView, Mesh* mesh);
     // расчет количества FPS
     void calcFPS();
 
@@ -63,9 +68,12 @@ private:
     // указатели на все графические объекты, которые необходимо вывести в данном кадре
     std::vector<GraphicObject*> graphicObjects;
 
+
     // измеренное количество кадров в секунду
     float FPS;
     std::clock_t startTime;
     std::clock_t elapsedTime;
+    int drawCalls;
+    int materialChanges;
     int frames;
 };

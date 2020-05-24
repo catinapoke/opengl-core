@@ -72,6 +72,18 @@ void Shader::setUniform(const std::string& name, glm::mat4 value)
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
+void Shader::setUniform(const std::string& name, std::vector<glm::mat4>& value)
+{
+    GLuint location = getUniformLocation(name);
+    glUniformMatrix4fv(location, value.size(), GL_FALSE, glm::value_ptr(value[0]));
+}
+
+void Shader::setUniform(const std::string& name, glm::mat4* value, int arraySize)
+{
+    GLuint location = getUniformLocation(name);
+    glUniformMatrix4fv(location, arraySize, GL_FALSE, glm::value_ptr(value[0]));
+}
+
 unsigned int Shader::CompileShader(const char* shaderPath, int shaderType)
 {
     // 1. retrieve the shader source code from filePath

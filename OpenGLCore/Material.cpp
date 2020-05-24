@@ -67,3 +67,26 @@ int Material::getTextureId() const
 {
     return textureId;
 }
+
+bool Material::operator==(const Material& mat)
+{
+    return (this->ambient == mat.ambient &&
+        this->diffuse == mat.diffuse &&
+        this->shininess == mat.shininess &&
+        this->specular == mat.specular &&
+        this->textureId == mat.textureId);
+}
+
+bool Material::vec4Less(glm::vec4& vec, glm::vec4& vec2) const
+{
+    return (vec.r < vec2.r && vec.g < vec2.g && vec.b < vec2.b && vec.a < vec2.a);
+}
+
+bool Material::operator<(const Material& mat) const
+{
+    return vec4Less((glm::vec4&)this->ambient, (glm::vec4&)mat.ambient)
+        && vec4Less((glm::vec4&)this->diffuse, (glm::vec4&)mat.diffuse)
+        && vec4Less((glm::vec4&)this->specular, (glm::vec4&)mat.specular)
+        && (this->shininess < mat.shininess)
+        && this->textureId < mat.textureId;
+}

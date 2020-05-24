@@ -6,25 +6,25 @@ std::unordered_map<std::string, GraphicObjectType> graphicObjectTypeMap
         { "road", GraphicObjectType::road},
         { "building", GraphicObjectType::building },
         { "vehicle", GraphicObjectType::vehicle },
-        { "big_nature", GraphicObjectType::big_nature },
-        { "small_nature", GraphicObjectType::small_nature },
-        { "big_prop", GraphicObjectType::big_prop },
-        { "medium_prop", GraphicObjectType::medium_prop },
-        { "small_prop", GraphicObjectType::small_prop }
+        { "big nature", GraphicObjectType::big_nature },
+        { "small nature", GraphicObjectType::small_nature },
+        { "big prop", GraphicObjectType::big_prop },
+        { "medium prop", GraphicObjectType::medium_prop },
+        { "small prop", GraphicObjectType::small_prop }
     }
 );
 
-GraphicObject::GraphicObject() :meshId(0), position(0), angleOY(0), color(0), modelMatrix(1), type(GraphicObjectType()), dimensions(glm::vec3())
+GraphicObject::GraphicObject() :meshId(0), position(0), angleOY(0), color(0), materialId(0), modelMatrix(1), type(GraphicObjectType()), dimensions(glm::vec3())
 {
 }
 
-GraphicObject::GraphicObject(int meshId, vec4 color, vec3 position, float angle, Material material, GraphicObjectType type, glm::vec3 dimensions) : modelMatrix(1)
+GraphicObject::GraphicObject(int meshId, vec4 color, vec3 position, float angle, int materialId, GraphicObjectType type, glm::vec3 dimensions) : modelMatrix(1)
 {
     this->meshId = meshId;
     this->position = position;
     this->angleOY = angle;
     this->color = color;
-    this->material = material;
+    this->materialId = materialId;
     this->type = type;
     this->dimensions = dimensions;
     recalculateModelMatrix();
@@ -52,9 +52,9 @@ void GraphicObject::setAngleOY(float degree)
     recalculateModelMatrix();
 }
 
-void GraphicObject::setMaterial(Material material)
+void GraphicObject::setMaterial(int materialId)
 {
-    this->material = material;
+    this->materialId = materialId;
 }
 
 void GraphicObject::setType(GraphicObjectType type)
@@ -67,9 +67,9 @@ void GraphicObject::setDimensions(glm::vec3 dimensions)
     this->dimensions = dimensions;
 }
 
-const Material& GraphicObject::getMaterial()
+const int& GraphicObject::getMaterialId()
 {
-    return material;
+    return materialId;
 }
 
 const GraphicObjectType& GraphicObject::getType()

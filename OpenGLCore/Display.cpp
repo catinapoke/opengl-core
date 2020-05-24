@@ -5,11 +5,14 @@
 
 using mat4 = glm::mat4;
 
+const float zFar = 1000.0f;
+const float yFov = 60.0f;
+
 void DisplayInit()
 {
     glutDisplayFunc(Display);
     glutReshapeFunc(Reshape);
-    camera->setProjectionMatrix(60.0f, (float)4 / 3, 1.0f, 100.0f);
+    camera->setProjectionMatrix(yFov, (float)4 / 3, 1.0f, zFar);
     shader.use();
     Shader::disable();
 }
@@ -17,7 +20,7 @@ void DisplayInit()
 void Reshape(int w, int h)
 {
     glViewport(0, 0, static_cast<GLsizei>(w), static_cast<GLsizei>(h));
-    camera->setProjectionMatrix(60.0f, (float)w / h, 1.0f, 100.0f);
+    camera->setProjectionMatrix(yFov, (float)w / h, 1.0f, zFar);
 };
 
 void Display(void)
@@ -32,7 +35,7 @@ void Display(void)
     glutSwapBuffers();
 
     char tempStr[128];
-    sprintf_s(tempStr, "[%06.2f FPS] Laba_05 %s", renderManager.getFPS(), scene.getSceneDescription().c_str());
+    sprintf_s(tempStr, "[%06.2f FPS][DrawCalls: %d][MateralChanges: %d] Lab_06 %s", renderManager.getFPS(), renderManager.getDrawCalls(), renderManager.getMaterialChanges(), scene.getSceneDescription().c_str());
     glutSetWindowTitle(tempStr);
 };
 

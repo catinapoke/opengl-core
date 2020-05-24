@@ -4,6 +4,7 @@
 
 #include "Mesh.h"
 #include "Texture.h"
+#include "Material.h"
 
 // КЛАСС ДЛЯ РАБОТЫ С МЕНЕДЖЕРОМ РЕСУРСОВ (РЕАЛИЗОВАН НА ОСНОВЕ ШАБЛОНА SINGLETON)
 class ResourceManager
@@ -21,6 +22,9 @@ public:
     int loadTexture(std::string filename);
     Texture* getTexture(int index);
 
+    int loadMaterial(Material* material);
+    Material* getMaterial(int index);
+
 private:
     // конструктор по умолчанию (объявлен приватным)
     // в результате нельзя создать ни одного объекта данного класса вне самого класса
@@ -36,4 +40,7 @@ private:
 
     std::vector<Texture*> textures;
     std::map<std::string, int> textures_id;
+
+    std::vector<Material*> materials;
+    std::map<Material, int> materials_id;
 };

@@ -35,3 +35,21 @@ Texture* ResourceManager::getTexture(int index)
         return textures[index];
     return nullptr;
 }
+
+int ResourceManager::loadMaterial(Material* material)
+{
+    for (int i = 0; i < materials.size(); i++)
+        if (material->operator==(*materials[i]))
+            return i;
+
+    materials.push_back(material);
+    printf("Materials: %d\n", materials.size());
+    return materials.size() - 1;
+}
+
+Material* ResourceManager::getMaterial(int index)
+{
+    if (materials.size() > index && index >= 0)
+        return materials[index];
+    return nullptr;
+}

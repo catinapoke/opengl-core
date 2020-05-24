@@ -26,13 +26,13 @@ class GraphicObject
 public:
     // конструктор по умолчанию
     GraphicObject();
-    GraphicObject(int meshId, vec4 _color, vec3 _position, float _angle, Material material, GraphicObjectType type, glm::vec3 dimensions);
+    GraphicObject(int meshId, vec4 _color, vec3 _position, float _angle, int materialId, GraphicObjectType type, glm::vec3 dimensions);
 
     void setMesh(int meshId);
     void setColor(glm::vec4 color);
     void setPosition(glm::vec3 position);
     void setAngleOY(float degree);
-    void setMaterial(Material material);
+    void setMaterial(int materialId);
     void setType(GraphicObjectType type);
     void setDimensions(glm::vec3 dimensions);
 
@@ -41,7 +41,7 @@ public:
     const glm::vec3& getPosition();
     const float& getAngleOY();
     const glm::mat4& getModelMatrix();
-    const Material& getMaterial();
+    const int& getMaterialId();
     const GraphicObjectType& getType();
     const glm::vec3& getDimensions();
 
@@ -53,7 +53,7 @@ private:
     vec3 position;
     float angleOY;
     glm::mat4 modelMatrix;
-    Material material;
+    int materialId;
     GraphicObjectType type;
     // collider (W x H x D)
     glm::vec3 dimensions;

@@ -24,6 +24,10 @@ public:
     void setTextureId(int textureId);
     int getTextureId() const;
 
+    bool operator==(const Material& mat);
+
+    bool vec4Less(glm::vec4& vec, glm::vec4& vec2) const;
+    bool operator<(const Material& mat) const;
 private:
     // id-текстуры в менеджере ресурсов
     int textureId;

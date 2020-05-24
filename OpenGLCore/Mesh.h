@@ -35,9 +35,12 @@ public:
     Mesh(std::string filename);
     // загрузка меша из внешнего obj-файла
     bool load(std::string filename);
+#if debug
     bool oldLoad(std::string filename);
+#endif
     // вывод меша
-    void draw();
+    void drawSingle();
+    void drawInstanced(int count);
 
 private:
     GLuint VAO;

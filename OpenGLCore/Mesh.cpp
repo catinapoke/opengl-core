@@ -75,7 +75,7 @@ bool Mesh::load(std::string filename)
         file.getline(temp, 512);
     };
     file.close();
-    // printf("File proceeded\n");
+
     vertices = std::vector<Vertex>(0);
 
     for (auto it : faces)
@@ -100,7 +100,6 @@ bool Mesh::load(std::string filename)
             vertexToIndex.emplace(faceString, vertices.size() - 1);
         }
     }
-    //printf("File proceeded\n");
 
 #if debug
     printf("Vertex count - %i\n Indices count - %i \n\n", static_cast<int>(faces.size()), static_cast<int>(indices.size()));
@@ -152,6 +151,20 @@ bool Mesh::load(std::string filename)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     return true;
+}
+
+void Mesh::drawSingle()
+{
+    glBindVertexArray(VAO);
+    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+    glBindVertexArray(0);
+}
+
+void Mesh::drawInstanced(int count)
+{
+    glBindVertexArray(VAO);
+    glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, count);
+    glBindVertexArray(0);
 }
 
 #if 0
@@ -273,17 +286,10 @@ bool Mesh::oldLoad(std::string filename)
     glVertexAttribPointer(location, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, textureCoord));
     glEnableVertexAttribArray(location);
 
-    
+
     glBindVertexArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     return true;
 }
 #endif
-
-void Mesh::draw()
-{
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-}

@@ -13,8 +13,6 @@
 #include "GraphicObject.h"
 #include "Light.h"
 
-#define debug 0
-
 // КЛАСС ДЛЯ РАБОТЫ СО СЦЕНОЙ
 class Scene
 {
@@ -65,4 +63,5 @@ private:
     rapidjson::Document* modelsDescription;
     // имя файла загруженной сцены (для формирования отладочного сообщения)
     std::string sceneFilename;
+    static const std::unordered_map<GraphicObjectType, int> LODDistance;
 };

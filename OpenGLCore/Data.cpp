@@ -14,7 +14,7 @@ GLuint VBO; // ArrayBuffer
 GLuint EBO; // ElementBuffer
 GLuint VAO; // VertexArray
 
-std::string shaderPath = "resources/shader/lab5";
+std::string shaderPath = "resources/shader/ver6";
 Shader shader;
 
 Camera* camera;

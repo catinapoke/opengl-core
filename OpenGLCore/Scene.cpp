@@ -1,5 +1,19 @@
 #include "Scene.h"
 #include "RenderManager.h"
+#include <algorithm>
+
+#define debug 0
+
+const std::unordered_map<GraphicObjectType, int> Scene::LODDistance = {
+    {GraphicObjectType::road,         -1},//
+    {GraphicObjectType::building,     -1},//
+    {GraphicObjectType::vehicle,      500},
+    {GraphicObjectType::big_nature,   350},
+    {GraphicObjectType::small_nature, 200},
+    {GraphicObjectType::big_prop,     400},
+    {GraphicObjectType::medium_prop,  300},
+    {GraphicObjectType::small_prop,   200}
+};
 
 void Scene::init(std::string filename)
 {
@@ -58,6 +72,16 @@ bool Scene::loadFromJSON(std::string filename)
         graphicObjects.push_back(graphicObject);
     }
     printf_s("Scene information - %s\n", getSceneDescription().c_str());
+    std::sort(graphicObjects.begin(), graphicObjects.end(),
+        [](GraphicObject a, GraphicObject b)
+        {
+            if (a.getMaterialId() < b.getMaterialId())
+                return true;
+            if (a.getMaterialId() == b.getMaterialId() && a.getMeshId() < b.getMeshId())
+                return true;
+            return false;
+        }
+    );
     return true;
 }
 
@@ -69,8 +93,19 @@ void Scene::draw()
     renderManager.setCamera(camera);
     renderManager.setLight(light);
 
+    glm::vec3 cameraPosition = camera->getPosition();
+
     for (int i = 0; i < graphicObjects.size(); i++)
     {
+        auto it = LODDistance.find(graphicObjects[i].getType());
+        if (it != LODDistance.end())
+            if (it->second > 0)
+            {
+                vec3 difference = (cameraPosition - graphicObjects[i].getPosition());
+                if (glm::pow(difference.x, 2) + glm::pow(difference.y, 2) + glm::pow(difference.z, 2) > glm::pow(it->second, 2))
+                    continue;
+            }
+
         renderManager.addToRenderQueue(&graphicObjects[i]);
     }
 }
@@ -133,7 +168,12 @@ GraphicObject Scene::createGraphicObject(rapidjson::Value::ConstMemberIterator i
 #endif
     ResourceManager& manager = ResourceManager::instance();
 
-    GraphicObjectType objectType = graphicObjectTypeMap[it->value["type"].GetString()];
+    std::string objectTypeStr = it->value["type"].GetString();
+    auto objectTypeIt = graphicObjectTypeMap.find(objectTypeStr);
+    if (objectTypeIt == graphicObjectTypeMap.end())
+        throw new std::exception("Can't recognize type");
+    GraphicObjectType objectType = objectTypeIt->second;
+
 #if debug
     printf("Object type: %s\n", it->value["type"].GetString());
     printf("Object's mesh path: %s\n", it->value["Mesh"]["path"].GetString());
@@ -158,7 +198,7 @@ GraphicObject Scene::createGraphicObject(rapidjson::Value::ConstMemberIterator i
     printf("Object's texture path: %s\n", it->value["Material"]["Texture"]["path"].GetString());
 #endif
     int textureId = manager.loadTexture(it->value["Material"]["Texture"]["path"].GetString());
-    Material material = Material(ambient, diffuse, specular, shininess, textureId);
+    int materialId = manager.loadMaterial(new Material(ambient, diffuse, specular, shininess, textureId));
 
-    return GraphicObject(meshId, vec4(1), vec3(0), 0.0f, material, objectType, dimensions);
+    return GraphicObject(meshId, vec4(1), vec3(0), 0.0f, materialId, objectType, dimensions);
 }
