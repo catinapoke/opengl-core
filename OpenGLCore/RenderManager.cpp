@@ -83,9 +83,9 @@ void RenderManager::finish()
     std::sort(graphicObjects.begin(), graphicObjects.end(),
         [](GraphicObject* a, GraphicObject* b)
         {
-            if (a->getMaterialId() < b->getMaterialId())
+            if (a->getMeshId() < b->getMeshId())
                 return true;
-            if (a->getMaterialId() == b->getMaterialId() && a->getMeshId() < b->getMeshId())
+            if (a->getMeshId() == b->getMeshId() && a->getMaterialId() < b->getMaterialId())
                 return true;
             return false;
         }
@@ -94,6 +94,7 @@ void RenderManager::finish()
 
     // ModelView Matrices
     std::vector<glm::mat4> models;
+    models.clear();
 
     // установить текущий меш и текущий материал
     int renderMeshId = graphicObjects[0]->getMeshId();
@@ -108,24 +109,24 @@ void RenderManager::finish()
 
     if (size == 1) {
         models.push_back(viewMatrix * graphicObjects[i]->getModelMatrix());
-        renderMesh->drawInstanced(models.size());
+        DrawInstanced(shaders[0], models, renderMesh);
     }
 
-    int currentMaterialId;
-    int currentMeshId;
+    int currentMaterialId = graphicObjects[i]->getMaterialId();;
+    int currentMeshId = graphicObjects[i]->getMeshId();;
 
     while (i < size)
     {
         // пока материал и меш совпадают и счетчик < макс 
         //      увеличиваем счетчик
         //      добавляем матрицы моделей 
-        do
+        while (currentMaterialId == renderMaterialId && currentMeshId == renderMeshId && i < size && models.size() < 20)
         {
             currentMaterialId = graphicObjects[i]->getMaterialId();
             currentMeshId = graphicObjects[i]->getMeshId();
             models.push_back(viewMatrix * graphicObjects[i]->getModelMatrix());
             i++;
-        } while (currentMaterialId == renderMaterialId && currentMeshId == renderMeshId && i < size && models.size() < 20);
+        } 
 
         // отрисовываем Instanced
         // DrawSingle(shaders[0], models, renderMesh);

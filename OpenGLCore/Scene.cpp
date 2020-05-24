@@ -75,9 +75,9 @@ bool Scene::loadFromJSON(std::string filename)
     std::sort(graphicObjects.begin(), graphicObjects.end(),
         [](GraphicObject a, GraphicObject b)
         {
-            if (a.getMaterialId() < b.getMaterialId())
+            if (a.getMeshId() < b.getMeshId())
                 return true;
-            if (a.getMaterialId() == b.getMaterialId() && a.getMeshId() < b.getMeshId())
+            if (a.getMeshId() == b.getMeshId() && a.getMaterialId() < b.getMaterialId())
                 return true;
             return false;
         }
