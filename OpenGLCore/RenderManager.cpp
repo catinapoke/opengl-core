@@ -2,6 +2,7 @@
 #include <algorithm>
 
 #define debug true
+#define MAX_INSTANCES = 20;
 
 void RenderManager::init(Shader shader)
 {
@@ -102,30 +103,32 @@ void RenderManager::finish()
     Mesh* renderMesh = manager.getMesh(renderMeshId);
     Material* renderMaterial = manager.getMaterial(renderMaterialId);
     SetRenderMaterial(renderMaterial);
+    models.push_back(viewMatrix * graphicObjects[0]->getModelMatrix());
 
     // начать счетчик с 1
     int i = 1;
     int size = graphicObjects.size();
 
     if (size == 1) {
-        models.push_back(viewMatrix * graphicObjects[i]->getModelMatrix());
         DrawInstanced(shaders[0], models, renderMesh);
     }
 
     int currentMaterialId = graphicObjects[i]->getMaterialId();;
-    int currentMeshId = graphicObjects[i]->getMeshId();;
+    int currentMeshId = graphicObjects[i]->getMeshId();
 
     while (i < size)
     {
         // пока материал и меш совпадают и счетчик < макс 
         //      увеличиваем счетчик
         //      добавляем матрицы моделей 
-        while (currentMaterialId == renderMaterialId && currentMeshId == renderMeshId && i < size && models.size() < 20)
+        while (currentMaterialId == renderMaterialId && currentMeshId == renderMeshId && (models.size() < 20))
         {
-            currentMaterialId = graphicObjects[i]->getMaterialId();
-            currentMeshId = graphicObjects[i]->getMeshId();
             models.push_back(viewMatrix * graphicObjects[i]->getModelMatrix());
             i++;
+            if (i >= size)
+                break;
+            currentMaterialId = graphicObjects[i]->getMaterialId();
+            currentMeshId = graphicObjects[i]->getMeshId();
         } 
 
         // отрисовываем Instanced

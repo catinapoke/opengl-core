@@ -31,6 +31,8 @@ public:
     // Вывод всей сцены (посредством обращения к RenderManager)
     void draw();
 
+    
+
     // Получение и установка камеры сцены
     Camera* getCamera();
     void SetCamera(Camera* camera);
@@ -51,6 +53,10 @@ private:
     // Преобразование строк в вектора с помощью потоков
     vec3 StrToVec3(std::string str);
     vec4 StrToVec4(std::string str);
+    // LOD check realisation
+    bool LODSkip(GraphicObject& graphicObject, glm::vec3& cameraPosition);
+    bool FrustrumCullingSkip(GraphicObject& graphicObject, Camera& camera);
+    bool FrustrumCullingSkip(GraphicObject& graphicObject, glm::mat4& projectionViewMatrix);
 
 private:
     // Камера

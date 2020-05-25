@@ -72,6 +72,7 @@ bool Scene::loadFromJSON(std::string filename)
         graphicObjects.push_back(graphicObject);
     }
     printf_s("Scene information - %s\n", getSceneDescription().c_str());
+
     std::sort(graphicObjects.begin(), graphicObjects.end(),
         [](GraphicObject a, GraphicObject b)
         {
@@ -82,6 +83,7 @@ bool Scene::loadFromJSON(std::string filename)
             return false;
         }
     );
+
     return true;
 }
 
@@ -94,20 +96,110 @@ void Scene::draw()
     renderManager.setLight(light);
 
     glm::vec3 cameraPosition = camera->getPosition();
+    glm::mat4 projectionViewMatrix = camera->getProjectionMatrix() * camera->getViewMatrix();
 
     for (int i = 0; i < graphicObjects.size(); i++)
     {
-        auto it = LODDistance.find(graphicObjects[i].getType());
-        if (it != LODDistance.end())
-            if (it->second > 0)
-            {
-                vec3 difference = (cameraPosition - graphicObjects[i].getPosition());
-                if (glm::pow(difference.x, 2) + glm::pow(difference.y, 2) + glm::pow(difference.z, 2) > glm::pow(it->second, 2))
-                    continue;
-            }
+        if (LODSkip(graphicObjects[i], cameraPosition))
+            continue;
+        if(FrustrumCullingSkip(graphicObjects[i], projectionViewMatrix))
+            continue;
 
         renderManager.addToRenderQueue(&graphicObjects[i]);
     }
+}
+
+bool Scene::LODSkip(GraphicObject& graphicObject, glm::vec3& cameraPosition)
+{
+    // LOD realisation
+    auto it = LODDistance.find(graphicObject.getType());
+    if (it != LODDistance.end())
+        if (it->second > 0)
+        {
+            // If distance from camera to object > renderDistance then do NOT render
+            vec3 difference = (cameraPosition - graphicObject.getPosition());
+            if (glm::pow(difference.x, 2) + glm::pow(difference.y, 2) + glm::pow(difference.z, 2) > glm::pow(it->second, 2))
+                return true;
+        }
+    return false;
+}
+
+bool Scene::FrustrumCullingSkip(GraphicObject& graphicObject, Camera& camera)
+{
+    glm::vec3 dimensions = graphicObject.getDimensions();
+    //получить массив позиций границ
+    glm::vec4 corners[8] = {
+        {+dimensions.x / 2, +dimensions.y / 2, +dimensions.z / 2, 1.0 },
+        {+dimensions.x / 2, +dimensions.y / 2, -dimensions.z / 2, 1.0 },
+        {+dimensions.x / 2, -dimensions.y / 2, +dimensions.z / 2, 1.0 },
+        {+dimensions.x / 2, -dimensions.y / 2, -dimensions.z / 2, 1.0 },
+        {-dimensions.x / 2, +dimensions.y / 2, +dimensions.z / 2, 1.0 },
+        {-dimensions.x / 2, +dimensions.y / 2, -dimensions.z / 2, 1.0 },
+        {-dimensions.x / 2, -dimensions.y / 2, +dimensions.z / 2, 1.0 },
+        {-dimensions.x / 2, -dimensions.y / 2, -dimensions.z / 2, 1.0 }
+    };
+    // матрица преобразований в усеченную систему координат (clip space)
+    ivec3 side(0);
+    glm::mat4 PVM = camera.getProjectionMatrix() * camera.getViewMatrix() * graphicObject.getModelMatrix();
+    for (int i = 0; i < 8; i++)
+    {
+        // convert to clip space
+        corners[i] = corners[i] * PVM;
+        // a. Если все вершины лежат справа от усеченной пирамиды видимости(x больше + w), то OBB не виден;
+        // b. Если все вершины лежат слева от усеченной пирамиды видимости(x меньше - w), то OBB не виден;
+        side.x += (corners[i].x > corners[i].w ? +1 : -1);
+        // c. Если  все  вершины  лежат  выше  усеченной  пирамиды  видимости(y больше + w), то OBB не виден;
+        // d. Если  все  вершины  лежат  ниже  усеченной  пирамиды  видимости(y меньше - w), то OBB не виден;
+        side.y += (corners[i].y > corners[i].w ? +1 : -1);
+        // e. Если все вершины лежат ближе, чем ближняя плоскость отсечения(z меньше - w), то OBB не виден;
+        // f. Если  все  вершины  лежат  дальше, чем  дальняя  плоскость отсечения(z больше + w), то OBB не виден;
+        side.z += (corners[i].z > corners[i].w ? +1 : -1);
+    }
+
+    if (abs(side.x) == 8 || abs(side.y) == 8 || abs(side.z) == 8)
+        return true;
+
+    // g. В  противном  случае  OBB  видно
+    return false;
+}
+
+bool Scene::FrustrumCullingSkip(GraphicObject& graphicObject, glm::mat4& projectionViewMatrix)
+{
+    glm::vec3 dimensions = graphicObject.getDimensions();
+    //получить массив позиций границ
+    glm::vec4 corners[8] = {
+        {+dimensions.x / 2, +dimensions.y / 2, +dimensions.z / 2, 1.0 },
+        {+dimensions.x / 2, +dimensions.y / 2, -dimensions.z / 2, 1.0 },
+        {+dimensions.x / 2, -dimensions.y / 2, +dimensions.z / 2, 1.0 },
+        {+dimensions.x / 2, -dimensions.y / 2, -dimensions.z / 2, 1.0 },
+        {-dimensions.x / 2, +dimensions.y / 2, +dimensions.z / 2, 1.0 },
+        {-dimensions.x / 2, +dimensions.y / 2, -dimensions.z / 2, 1.0 },
+        {-dimensions.x / 2, -dimensions.y / 2, +dimensions.z / 2, 1.0 },
+        {-dimensions.x / 2, -dimensions.y / 2, -dimensions.z / 2, 1.0 }
+    };
+    // матрица преобразований в усеченную систему координат (clip space)
+    ivec3 side(0);
+    glm::mat4 PVM = projectionViewMatrix * graphicObject.getModelMatrix();
+    for (int i = 0; i < 8; i++)
+    {
+        // convert to clip space
+        corners[i] = corners[i] * PVM;
+        // a. Если все вершины лежат справа от усеченной пирамиды видимости(x больше + w), то OBB не виден;
+        // b. Если все вершины лежат слева от усеченной пирамиды видимости(x меньше - w), то OBB не виден;
+        side.x += (corners[i].x > corners[i].w ? +1 : (corners[i].x < -corners[i].w)? -1 : 0 );
+        // c. Если  все  вершины  лежат  выше  усеченной  пирамиды  видимости(y больше + w), то OBB не виден;
+        // d. Если  все  вершины  лежат  ниже  усеченной  пирамиды  видимости(y меньше - w), то OBB не виден;
+        side.y += (corners[i].y > corners[i].w ? +1 : (corners[i].y < -corners[i].w) ? -1 : 0);
+        // e. Если все вершины лежат ближе, чем ближняя плоскость отсечения(z меньше - w), то OBB не виден;
+        // f. Если  все  вершины  лежат  дальше, чем  дальняя  плоскость отсечения(z больше + w), то OBB не виден;
+        side.z += (corners[i].z > corners[i].w ? +1 : (corners[i].z < -corners[i].w) ? -1 : 0);
+    }
+
+    if (abs(side.x) == 8 || abs(side.y) == 8 || abs(side.z) == 8)
+        return true;
+
+    // g. В  противном  случае  OBB  видно
+    return false;
 }
 
 vec3 Scene::StrToVec3(std::string str)
@@ -130,7 +222,7 @@ vec4 Scene::StrToVec4(std::string str)
 
 GraphicObject Scene::createGraphicObject(std::string str)
 {
-    for (rapidjson::Value::ConstMemberIterator it = (*modelsDescription)["Models"].MemberBegin(); 
+    for (rapidjson::Value::ConstMemberIterator it = (*modelsDescription)["Models"].MemberBegin();
         it != (*modelsDescription)["Models"].MemberEnd(); it++)
     {
         if (it->value["id"].GetString() == str)
@@ -202,3 +294,24 @@ GraphicObject Scene::createGraphicObject(rapidjson::Value::ConstMemberIterator i
 
     return GraphicObject(meshId, vec4(1), vec3(0), 0.0f, materialId, objectType, dimensions);
 }
+
+/*
+struct Region
+{
+    vec2 max x,z
+    vec2 min x,z
+    graphicObjects[]
+    
+    vec3 centerpos
+    vec2 localCorners[]
+    mat4 modelView
+
+    Region* subRegions
+}
+*/
+
+// получаем список объектов
+// запоминаем угловые точки x,z
+// создаем самый большой регион
+// дробим его по четвертям
+// отдаем 
